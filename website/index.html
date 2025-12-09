@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>D&G VPN – Get Your Config</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Quantico font -->
+  <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Quantico', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: #0f172a;
+      padding: 2rem 1.75rem;
+      border-radius: 0;              /* square edges */
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.5);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.6rem;
+    }
+
+    label {
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      margin-bottom: 0.9rem;
+      border-radius: 0;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      font-family: inherit;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 0;
+      border: none;
+      cursor: pointer;
+      background: #1e87bb; /* blue button */
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    button:disabled {
+      background: #4b5563;
+      cursor: default;
+    }
+
+    .msg {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      min-height: 1.2em;
+    }
+
+    .instructions {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #1f2937;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .instructions a {
+      color: #75caff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>D&G VPN</h1>
+    <p style="font-size:0.9rem; opacity:0.8;">
+      Enter your VPN username to download your personalized <code>.ovpn</code> config.
+    </p>
+
+    <label for="name">VPN username</label>
+    <input id="name" placeholder="e.g. brianna" />
+
+    <label for="secret">Access code</label>
+    <input id="secret" placeholder="Ask us for this code" type="password" />
+
+    <button id="btn">Generate & Download</button>
+    <div id="msg" class="msg"></div>
+
+    <div class="instructions">
+      <h3 style="margin:0 0 8px;">macOS Setup (Tunnelblick)</h3>
+      <p>
+        • Install Tunnelblick:
+        <a href="https://tunnelblick.net/downloads.html" target="_blank">tunnelblick.net</a><br>
+        • Double-click your <code>.ovpn</code> file.<br>
+        • Choose “Only Me” and click <strong>Connect</strong>.<br>
+        • Verify IP:
+        <a href="https://whatismyipaddress.com" target="_blank">whatismyipaddress.com</a>
+      </p>
+
+      <h3 style="margin:12px 0 8px;">Windows Setup (OpenVPN)</h3>
+      <p>
+        • Install OpenVPN Client:
+        <a href="https://openvpn.net/client-connect-vpn-for-windows/" target="_blank">OpenVPN for Windows</a><br>
+        • Open the app → <strong>Import</strong> → select your <code>.ovpn</code> file.<br>
+        • Click <strong>Connect</strong> and verify IP:
+        <a href="https://ipinfo.io" target="_blank">ipinfo.io</a>
+      </p>
+
+      <h3 style="margin:12px 0 8px;">Troubleshooting</h3>
+      <p>
+        • Use ONLY your assigned <code>.ovpn</code>.<br>
+        • Restart your VPN app if it fails to connect.<br>
+        • Some Wi-Fi networks block VPN traffic (try mobile hotspot).<br>
+        • If it’s still broken, DM Derek.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // IMPORTANT: use the Netlify function path (this is what worked before)
+    const API_URL = "/.netlify/functions/create-client";
+
+    const btn = document.getElementById("btn");
+    const nameInput = document.getElementById("name");
+    const secretInput = document.getElementById("secret");
+    const msg = document.getElementById("msg");
+
+    btn.addEventListener("click", async () => {
+      const name = nameInput.value.trim();
+      const secret = secretInput.value.trim();
+
+      msg.textContent = "";
+      if (!name) {
+        msg.textContent = "Enter a username.";
+        return;
+      }
+      if (!secret) {
+        msg.textContent = "Enter the access code.";
+        return;
+      }
+
+      msg.textContent = "Generating config...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, secret })
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          msg.textContent = data.error || "Error from server.";
+          btn.disabled = false;
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${name}.ovpn`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        msg.textContent = "Download started!";
+      } catch (err) {
+        console.error(err);
+        msg.textContent = "Network error.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
