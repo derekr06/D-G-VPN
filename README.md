@@ -66,5 +66,5 @@ Actual operational config lives securely on the EC2 instance.
 
 
 
-This is a networking project to practice using AWS and API's. 
+This is a networking project to practice using AWS and API's. We also practiced using html to design site. 
 Private keys and real certificates **are NOT included** for security reasons.
