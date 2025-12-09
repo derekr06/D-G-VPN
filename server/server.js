@@ -7,7 +7,6 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
-// CHANGE THIS to something only you share with trusted people
 const ADMIN_SECRET = "this is not the real password";
 
 app.use(cors());
@@ -20,12 +19,10 @@ app.post("/create-client", (req, res) => {
     return res.status(400).json({ error: "Missing or invalid 'name'" });
   }
 
-  // Basic "auth" so random people can't hit this
   if (secret !== ADMIN_SECRET) {
     return res.status(403).json({ error: "Forbidden" });
   }
 
-  // Sanitize username a bit
   const safeName = name.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
   if (!safeName) {
     return res.status(400).json({ error: "Invalid username after sanitizing" });
@@ -49,7 +46,6 @@ app.post("/create-client", (req, res) => {
         return res.status(500).json({ error: "Could not read .ovpn file" });
       }
 
-      // Return as a downloadable file
       res.setHeader(
         "Content-Disposition",
         `attachment; filename="${safeName}.ovpn"`

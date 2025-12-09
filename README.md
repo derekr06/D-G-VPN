@@ -46,8 +46,24 @@ The following sensitive files are intentionally excluded:
 ## Actual Deployment Notes
 The real server runs on an AWS EC2 Ubuntu instance.
 
-This folder is for reference only.  
+The openvpn-config folder is for reference only.  
 Actual operational config lives securely on the EC2 instance.
+
+
+## How to install your own personalized VPN profile 
+
+1. Visit: https://networks-gui.netlify.app/
+
+2. Ask us for private access code and enter any username you'd like 
+
+3. Download .ovpn file and save it 
+
+3. Install tunnelblick on MacOS, or OpenVPN on Windows or Mobile
+
+4. Upload your file and connect! 
+
+5. Now you're connected to a VPN with high secrurity and ad blocking capabilities!
+
 
 
 This is a networking project to practice using AWS and API's. 
