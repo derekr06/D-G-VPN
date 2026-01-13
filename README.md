@@ -15,7 +15,7 @@ This repository contains all non-sensitive code used to build the project.
 - demonstration/ - Images showing the project working
 - server/ — Node.js API + automation script  
 - website/ — Front-end static site (Netlify)  
-- openvpn-server-config/ — Sanitized OpenVPN server config  
+- openvpn-config/ — Sanitized OpenVPN server config  
 - diagrams/ — Topology and packet-flow diagrams  
 
 # OpenVPN Configuration (Sanitized)
